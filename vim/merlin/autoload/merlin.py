@@ -694,7 +694,7 @@ def vim_current_enclosing():
         # The indexes in the cache correspond to the *innermost* request - but changing the
         # cursor-postion of the request, will change the indexes of the response. Thus, I re-use the
         # position of the innermost cached enclosing-type.
-        innermost_type = enclosing_types[-1:][0]
+        innermost_type = enclosing_types[0]
         types = command2(
                 ["type-enclosing",
                  "-position", fmtpos(innermost_type['start']),
