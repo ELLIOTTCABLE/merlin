@@ -681,19 +681,21 @@ def vim_current_enclosing():
     tmp = enclosing_types[current_enclosing]
     tmp['matcher'] = make_matcher(tmp['start'], tmp['end'])
 
-    # The server has an undocumented functionality where it still returns *all* enclosing nodes when
-    # the `type-enclosing` command is passed `-index` (this is contrary to the documentation of the
-    # protocol); with only the reqested element having an actual type-string attached. The remaining
-    # elements do not have their type calculated (which *is* in line with the protocol
-    # documentation); and instead simply have their *index in the response* reported in the `type`
-    # field.
+    # The server has an undocumented functionality where it still returns *all*
+    # enclosing nodes when the `type-enclosing` command is passed `-index` (this
+    # is contrary to the documentation of the protocol); with only the reqested
+    # element having an actual type-string attached. The remaining elements do
+    # not have their type calculated (which *is* in line with the protocol
+    # documentation); and instead simply have their *index in the response*
+    # reported in the `type` field.
     #
-    # tl;dr If our `enclosing_types` cache has an `int` value in `type`, then the actual value has
-    # to be requested from the server again.
+    # tl;dr If our `enclosing_types` cache has an `int` value in `type`, then
+    # the actual value has to be requested from the server again.
     if isinstance(tmp['type'], int):
-        # The indexes in the cache correspond to the *innermost* request - but changing the
-        # cursor-postion of the request, will change the indexes of the response. Thus, I re-use the
-        # position of the innermost cached enclosing-type.
+        # The indexes in the cache correspond to the *innermost* request - but
+        # changing the cursor-postion of the request, will change the indexes of
+        # the response. Thus, I re-use the position of the innermost cached
+        # enclosing-type.
         innermost_type = enclosing_types[0]
         types = command2(
                 ["type-enclosing",
