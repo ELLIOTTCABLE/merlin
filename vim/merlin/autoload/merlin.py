@@ -674,12 +674,8 @@ def enclosing_tail_info(record):
     if record['tail'] == 'position': return ' (* tail position *)'
     return ''
 
-
-def vim_current_enclosing():
+def enclosing_type_text(record):
     global enclosing_types
-    global current_enclosing
-    tmp = enclosing_types[current_enclosing]
-    tmp['matcher'] = make_matcher(tmp['start'], tmp['end'])
 
     # The server has an undocumented functionality where it still returns *all*
     # enclosing nodes when the `type-enclosing` command is passed `-index` (this
@@ -691,21 +687,30 @@ def vim_current_enclosing():
     #
     # tl;dr If our `enclosing_types` cache has an `int` value in `type`, then
     # the actual value has to be requested from the server again.
-    if isinstance(tmp['type'], int):
+    if isinstance(record['type'], int):
         # The indexes in the cache correspond to the *innermost* request - but
         # changing the cursor-postion of the request, will change the indexes of
         # the response. Thus, I re-use the position of the innermost cached
         # enclosing-type.
         innermost_type = enclosing_types[0]
+
         types = command2(
                 ["type-enclosing",
                  "-position", fmtpos(innermost_type['start']),
-                 "-index", str(tmp['type'])
+                 "-index", str(record['type'])
                 ],
                 track_verbosity=True
                 )
 
-        tmp['type'] = types[tmp['type']]['type']
+        record['type'] = types[record['type']]['type']
+
+def vim_current_enclosing():
+    global enclosing_types
+    global current_enclosing
+    tmp = enclosing_types[current_enclosing]
+    tmp['matcher'] = make_matcher(tmp['start'], tmp['end'])
+
+    enclosing_type_text(tmp)
 
     tmp['tail_info'] = enclosing_tail_info(tmp)
     return json.dumps(tmp)
